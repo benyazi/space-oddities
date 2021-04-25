@@ -1,0 +1,2 @@
+prototype: "/src/objects/WallBottom.go"
+load_dynamically: false

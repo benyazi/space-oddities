@@ -1,0 +1,91 @@
+MapManager = require 'src.scripts.MapManager'
+SHIP_RESOURCES = {
+	food = 100,
+	fuel = 300,
+	foodDiff = 0,
+	fuelDiff = -3,
+	speed = 0,
+	distance = 100
+}
+
+function init(self)
+	msg.post('/gui_manager#ShipResources', 'UPDATE_RESOURCES', {type = "fuel", value = SHIP_RESOURCES.fuel})
+	msg.post('/gui_manager#ShipResources', 'UPDATE_RESOURCES', {type = "food", value = SHIP_RESOURCES.food})
+	msg.post('/gui_manager#ShipResources', 'UPDATE_RESOURCES_DIFF', {type = "food", value = SHIP_RESOURCES.foodDiff})
+	msg.post('/gui_manager#ShipResources', 'UPDATE_RESOURCES_DIFF', {type = "fuel", value = SHIP_RESOURCES.fuelDiff})
+	msg.post('/gui_manager#ShipResources', 'UPDATE_RESOURCES', {type = "distance", value = SHIP_RESOURCES.distance})
+	MapManager.initShip()
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+local function dataRound(num) 
+	if num >= 0 then return math.floor(num+.5) 
+	else return math.ceil(num-.5) end
+end
+
+function update(self, dt)
+	if GAME_STATE ~= 'in_progress' then 
+		return
+	end
+	
+	if SHIP_RESOURCES.foodDiff ~= 0 then 
+		SHIP_RESOURCES.food = SHIP_RESOURCES.food + SHIP_RESOURCES.foodDiff * dt
+		if SHIP_RESOURCES.food < 0 then
+			SHIP_RESOURCES.food = 0
+		end
+		msg.post('/gui_manager#ShipResources', 'UPDATE_RESOURCES', {type = "food", value = dataRound(SHIP_RESOURCES.food)})
+	end
+	if SHIP_RESOURCES.fuelDiff ~= 0 then 
+		SHIP_RESOURCES.fuel = SHIP_RESOURCES.fuel + SHIP_RESOURCES.fuelDiff * dt
+		msg.post('/gui_manager#ShipResources', 'UPDATE_RESOURCES', {type = "fuel", value = dataRound(SHIP_RESOURCES.fuel)})
+	end
+
+	if SHIP_RESOURCES.distance > 0 and SHIP_RESOURCES.speed > 0 then 
+		SHIP_RESOURCES.distance = SHIP_RESOURCES.distance - (SHIP_RESOURCES.speed/2) * dt
+		msg.post('/gui_manager#ShipResources', 'UPDATE_RESOURCES', {type = "distance", value = dataRound(SHIP_RESOURCES.distance)})
+	elseif SHIP_RESOURCES.distance <= 0 then
+		msg.post('/GameManager', 'FINISH_DISTANCE')
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash('FUEL_ADD') then 
+		SHIP_RESOURCES.fuel = SHIP_RESOURCES.fuel + message.value
+		msg.post('/gui_manager#ShipResources', 'UPDATE_RESOURCES', {type = "fuel", value = SHIP_RESOURCES.fuel})
+	elseif message_id == hash('FOOD_ADD') then 
+		SHIP_RESOURCES.food = SHIP_RESOURCES.food + message.value
+		msg.post('/gui_manager#ShipResources', 'UPDATE_RESOURCES', {type = "food", value = SHIP_RESOURCES.food})
+	elseif message_id == hash('FOOD_DIFF') then 
+		SHIP_RESOURCES.foodDiff = message.value
+		msg.post('/gui_manager#ShipResources', 'UPDATE_RESOURCES_DIFF', {type = "food", value = SHIP_RESOURCES.foodDiff})
+	elseif message_id == hash('FUEL_DIFF') then 
+		SHIP_RESOURCES.fuelDiff = message.value
+		msg.post('/gui_manager#ShipResources', 'UPDATE_RESOURCES_DIFF', {type = "fuel", value = SHIP_RESOURCES.fuelDiff})
+	elseif message_id == hash('UPDATE_SPEED') then 
+		SHIP_RESOURCES.speed = message.value
+		msg.post('/gui_manager#ShipResources', 'UPDATE_RESOURCES', {type = "speed", value = SHIP_RESOURCES.speed})
+	end
+end
+
+function on_input(self, action_id, action)
+	-- Add input-handling code here. The game object this script is attached to
+	-- must have acquired input focus:
+	--
+	--    msg.post(".", "acquire_input_focus")
+	--
+	-- All mapped input bindings will be received. Mouse and touch input will
+	-- be received regardless of where on the screen it happened.
+	-- Learn more: https://defold.com/manuals/input/
+	-- Remove this function if not needed
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end

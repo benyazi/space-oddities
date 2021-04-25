@@ -1,0 +1,2 @@
+prototype: "/src/objects/WallLeft.go"
+load_dynamically: false

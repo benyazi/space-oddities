@@ -1,0 +1,2 @@
+prototype: "/src/objects/Flame.go"
+load_dynamically: false

@@ -1,0 +1,71 @@
+local CAMERA_ID = hash('/camera')
+local cameraSpeed = 50
+
+function init(self)
+	self.direction = {
+		y = 0,
+		x = 0
+	}
+	self.zoom = 5
+	msg.post(".", "acquire_input_focus")
+	msg.post("/camera", "use_projection", { projection = hash("FIXED_AUTO") })
+	msg.post("/camera", "zoom_to", { zoom = self.zoom })
+	local camPos = go.get(CAMERA_ID, 'position')
+	camPos.x = camPos.x + 16 * 6
+	camPos.y = camPos.y - 16 * 6
+	go.set(CAMERA_ID, 'position', camPos)
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	local pos = go.get(CAMERA_ID, 'position')
+	pos.y = pos.y + self.direction.y * cameraSpeed * dt
+	pos.x = pos.x + self.direction.x * cameraSpeed * dt
+	go.set(CAMERA_ID, 'position', pos)
+	self.direction.y = 0
+	self.direction.x = 0
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Learn more: https://defold.com/manuals/message-passing/
+	-- Remove this function if not needed
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash('key_w') then
+		self.direction.y = 1
+	end
+	if action_id == hash('key_s') then
+		self.direction.y = -1
+	end
+	if action_id == hash('key_a') then
+		self.direction.x = -1
+	end
+	if action_id == hash('key_d') then
+		self.direction.x = 1
+	end
+	if action_id == hash('key_q') and action.pressed then
+		if self.zoom > 2 then 
+			self.zoom = self.zoom - 1
+			msg.post("/camera", "zoom_to", { zoom = self.zoom })
+		end
+	end
+	if action_id == hash('key_e') and action.pressed then
+		if self.zoom < 6 then 
+			self.zoom = self.zoom + 1
+			msg.post("/camera", "zoom_to", { zoom = self.zoom })
+		end
+	end
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end

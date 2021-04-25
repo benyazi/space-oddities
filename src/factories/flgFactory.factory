@@ -1,0 +1,2 @@
+prototype: "/src/objects/FuelGenerator.go"
+load_dynamically: false

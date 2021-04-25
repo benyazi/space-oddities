@@ -1,0 +1,204 @@
+Tiny = require 'lib.tiny'
+MapManager = require 'src.scripts.MapManager'
+FoodManager = require 'src.scripts.FoodManager'
+FuelManager = require 'src.scripts.FuelManager'
+WorkManager = require 'src.scripts.WorkManager'
+PoomManager = require 'src.scripts.PoomManager'
+camera = require "orthographic.camera"
+local CAMERA_ID = hash('/camera')
+
+GAME_STATE = 'start'
+
+POOMS = {}
+POOM_START_POSITION = {}
+ENGINE_START_FUEL = 5
+ACTIVE_POOM = nil
+WORK_OBJECTS = {}
+-- Entities = require.tree('src.entities')
+-- Systems = require.tree('src.systems')
+
+Systems = {
+	KwaMove = require 'src.systems.KwaMove',
+	Duplicator = require 'src.systems.DuplicatorSystem',
+	PoomActivator = require 'src.systems.PoomActivatorSystem',
+	FuelGenerator = require 'src.systems.FuelGeneratorSystem',
+	FoodGenerator = require 'src.systems.FoodGeneratorSystem',
+	EngineSystem = require 'src.systems.EngineSystem',
+	FoodChecker = require 'src.systems.FoodChecker',
+	PoomInfoSystem = require 'src.systems.PoomInfoSystem'
+}
+
+Entities = {
+	PoomEntity = require 'src.entities.PoomEntity',
+	FuelGeneratorEntity = require 'src.entities.FuelGeneratorEntity',
+	FoodGeneratorEntity = require 'src.entities.FoodGeneratorEntity',
+	DuplicatorEntity = require 'src.entities.DuplicatorEntity',
+	EngineEntity = require 'src.entities.EngineEntity',
+	FuelBagEntity = require 'src.entities.FuelBagEntity',
+}
+
+World = Tiny.world(
+Systems.KwaMove,
+Systems.Duplicator,
+Systems.PoomActivator,
+Systems.FuelGenerator,
+Systems.FoodGenerator,
+Systems.EngineSystem,
+Systems.FoodChecker,
+Systems.PoomInfoSystem
+)
+
+MousePosition = vmath.vector3(0, 0, 0)
+--  create system filters
+local drawFilter = Tiny.requireAll('isDrawSystem')
+local drawGuiFilter = Tiny.requireAll('isDrawGuiSystem')
+local updateFilter = Tiny.rejectAny('isDrawSystem','isDrawGuiSystem')
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	msg.post('/gui_manager#ShipResources', 'HIDE_NODES')
+	msg.post('/gui_manager#PoomInfo', 'HIDE_NODES')
+	particlefx.play("/particals#Stars")
+	PoomManager.loadNames()
+	-- local objId = factory.create("#PoomFactory", vmath.vector3(0, 0, 1))
+	-- World:addEntity(Entities.PoomEntity.new(objId, 100))
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	if GAME_STATE == 'in_progress' then 
+		World:update(dt,updateFilter)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash('EMPTY_POOMS') then 
+		print('EMPTY POOMS COUNT')
+
+		msg.post('/gui_manager#ShipResources', 'HIDE_NODES')
+		msg.post('/gui_manager#PoomInfo', 'HIDE_NODES')
+		msg.post('/gui_manager#MainMenu', 'GAME_OVER', {text = 'EMPTY SQUAD'})
+		GAME_STATE = 'end'
+	elseif message_id == hash('ENGINE_START') then 
+		FuelManager.recalculateSpeed()
+	elseif message_id == hash('ENGINE_STOP') then 
+		FuelManager.recalculateSpeed()
+	elseif message_id == hash('FINISH_DISTANCE') then 
+		msg.post('/gui_manager#ShipResources', 'HIDE_NODES')
+		msg.post('/gui_manager#PoomInfo', 'HIDE_NODES')
+		msg.post('/gui_manager#MainMenu', 'GAME_WIN', {text = 'YOU ARRIVED'})
+		GAME_STATE = 'end'
+	end
+	-- Add message-handling code here
+	-- Learn more: https://defold.com/manuals/message-passing/
+	-- Remove this function if not needed
+end
+
+function on_input(self, action_id, action)
+	
+	if action_id == hash('start_game') and action.pressed and GAME_STATE ~= 'in_progress' and GAME_STATE ~= 'pause' then 
+		if GAME_STATE == 'end' then 
+			for k, v in pairs(POOM_START_POSITION) do
+				MapManager.spawnPoom(v)
+			end
+			for k, v in pairs(WORK_OBJECTS) do
+				if v.isEngine then 
+					v.fuelBag = ENGINE_START_FUEL
+					World:addEntity(v)
+				end
+				if v.workTimer then 
+					v.workTimer = nil
+					World:addEntity(v)
+				end
+			end
+			GAME_STATE = 'in_progress'
+			msg.post('/gui_manager#ShipResources', 'SHOW_NODES')
+			msg.post('/gui_manager#MainMenu', 'HIDE_NODES')
+		else
+			GAME_STATE = 'in_progress'
+			msg.post('/gui_manager#ShipResources', 'SHOW_NODES')
+			msg.post('/gui_manager#MainMenu', 'HIDE_NODES')
+		end
+		return
+	end
+
+	if action_id == hash('start_game') and action.pressed and GAME_STATE == 'in_progress' then 
+		GAME_STATE = 'pause'
+		return
+	end
+
+	if action_id == hash('start_game') and action.pressed and GAME_STATE == 'pause' then 
+		GAME_STATE = 'in_progress'
+		return
+	end
+	
+	if GAME_STATE ~= 'in_progress' then 
+		return
+	end
+	
+	MousePosition.x = action.x
+	MousePosition.y = action.y
+	if action_id == hash('run') and action.pressed then 
+		-- for i = 0, 8 do
+		-- 	for j = 0, 6 do
+		-- 		print('Find ' .. i .. 'x' .. j)
+		-- 		MapManager.calculateNear(i, j)
+		-- 	end
+		-- end
+		
+		-- POOMS[#POOMS].path = MapManager.calculateWay(3, 3, 9, 5)
+		-- World:addEntity(POOMS[#POOMS])
+
+		for k, v in pairs(WORK_OBJECTS) do
+			if v.isDuplicator ~= nil then 
+				v.workTimer = 1
+				World:addEntity(v)
+			end
+		end
+	end
+	if action_id == hash("touch") and action.pressed then
+		local wPos = camera.screen_to_world(CAMERA_ID, vmath.vector3(action.x, action.y, 0))
+		
+		local checkWork = true
+		for k, v in pairs(POOMS) do
+			if ACTIVE_POOM ~= v then 
+				local pos = go.get_position(v.objId)
+				if pos.x < wPos.x + 8 and pos.x > wPos.x - 8 and pos.y < wPos.y + 8 and pos.y > wPos.y - 8 then 
+					WorkManager.makePoomActive(v)
+					checkWork = false
+				end
+			end
+		end
+		if ACTIVE_POOM and checkWork then 
+			WorkManager.movePoom(wPos, ACTIVE_POOM)
+			-- for k, v in pairs(WORK_OBJECTS) do
+			-- 	if v.isBusy == nil then 
+			-- 		local pos = go.get_position(v.objId)
+			-- 		if pos.x < wPos.x + 8 and pos.x > wPos.x - 8 and pos.y < wPos.y + 8 and pos.y > wPos.y - 8 then 
+			-- 			WorkManager.activate(v, ACTIVE_POOM)
+			-- 		end
+			-- 	end
+			-- end
+		end
+	end
+	-- Add input-handling code here. The game object this script is attached to
+	-- must have acquired input focus:
+	--
+	--    msg.post(".", "acquire_input_focus")
+	--
+	-- All mapped input bindings will be received. Mouse and touch input will
+	-- be received regardless of where on the screen it happened.
+	-- Learn more: https://defold.com/manuals/input/
+	-- Remove this function if not needed
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end

@@ -1,0 +1,74 @@
+function init(self)
+	self.nodes = {}
+	self.nodes[#self.nodes+1] = 'fuel_title'
+	self.nodes[#self.nodes+1] = 'fuel_value'
+	self.nodes[#self.nodes+1] = 'fuel_diff'
+	self.nodes[#self.nodes+1] = 'food_title'
+	self.nodes[#self.nodes+1] = 'food_value'
+	self.nodes[#self.nodes+1] = 'food_diff'
+	self.nodes[#self.nodes+1] = 'speed_title'
+	self.nodes[#self.nodes+1] = 'speed_value'
+	self.nodes[#self.nodes+1] = 'distance_title'
+	self.nodes[#self.nodes+1] = 'distance_value'
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	-- Add update code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash('UPDATE_RESOURCES') then 
+		local node = gui.get_node(message.type .. '_value')
+		gui.set_text(node, message.value)
+	elseif message_id == hash('UPDATE_RESOURCES_DIFF') then 
+		local node = gui.get_node(message.type .. '_diff')
+		if message.value < 0 then 
+			local color = vmath.vector3(1, 0, 0)
+			gui.set_color(node, color)
+			gui.set_text(node, message.value)
+		elseif  message.value == 0 then
+			local color = vmath.vector3(1, 1, 1)
+			gui.set_color(node, color)
+			gui.set_text(node, message.value)
+		else 
+			local color = vmath.vector3(0, 1, 0)
+			gui.set_text(node, '+' .. message.value)
+		end
+	elseif message_id == hash('HIDE_NODES') then 
+		for k, v in pairs(self.nodes) do
+			local node = gui.get_node(v)
+			gui.set_enabled(node, false)
+		end
+	elseif message_id == hash('SHOW_NODES') then 
+		for k, v in pairs(self.nodes) do
+			local node = gui.get_node(v)
+			gui.set_enabled(node, true)
+		end
+	end
+end
+
+function on_input(self, action_id, action)
+	-- Add input-handling code here. The game object this script is attached to
+	-- must have acquired input focus:
+	--
+	--    msg.post(".", "acquire_input_focus")
+	--
+	-- All mapped input bindings will be received. Mouse and touch input will
+	-- be received regardless of where on the screen it happened.
+	-- Learn more: https://defold.com/manuals/input/
+	-- Remove this function if not needed
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end

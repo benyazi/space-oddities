@@ -1,0 +1,2 @@
+prototype: "/src/objects/Engine.go"
+load_dynamically: false

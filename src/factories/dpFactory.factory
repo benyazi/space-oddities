@@ -1,0 +1,2 @@
+prototype: "/src/objects/Duplicator.go"
+load_dynamically: false
