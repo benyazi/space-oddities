@@ -103,22 +103,23 @@ function on_input(self, action_id, action)
 	
 	if action_id == hash('start_game') and action.pressed and GAME_STATE ~= 'in_progress' and GAME_STATE ~= 'pause' then 
 		if GAME_STATE == 'end' then 
-			for k, v in pairs(POOM_START_POSITION) do
-				MapManager.spawnPoom(v)
-			end
-			for k, v in pairs(WORK_OBJECTS) do
-				if v.isEngine then 
-					v.fuelBag = ENGINE_START_FUEL
-					World:addEntity(v)
-				end
-				if v.workTimer then 
-					v.workTimer = nil
-					World:addEntity(v)
-				end
-			end
-			GAME_STATE = 'in_progress'
-			msg.post('/gui_manager#ShipResources', 'SHOW_NODES')
-			msg.post('/gui_manager#MainMenu', 'HIDE_NODES')
+			msg.post("@system:", "reboot")
+			-- for k, v in pairs(POOM_START_POSITION) do
+			-- 	MapManager.spawnPoom(v)
+			-- end
+			-- for k, v in pairs(WORK_OBJECTS) do
+			-- 	if v.isEngine then 
+			-- 		v.fuelBag = ENGINE_START_FUEL
+			-- 		World:addEntity(v)
+			-- 	end
+			-- 	if v.workTimer then 
+			-- 		v.workTimer = nil
+			-- 		World:addEntity(v)
+			-- 	end
+			-- end
+			-- GAME_STATE = 'in_progress'
+			-- msg.post('/gui_manager#ShipResources', 'SHOW_NODES')
+			-- msg.post('/gui_manager#MainMenu', 'HIDE_NODES')
 		else
 			GAME_STATE = 'in_progress'
 			msg.post('/gui_manager#ShipResources', 'SHOW_NODES')

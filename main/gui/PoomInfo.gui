@@ -3,6 +3,10 @@ fonts {
   name: "system_font"
   font: "/builtins/fonts/system_font.font"
 }
+fonts {
+  name: "fff-forward"
+  font: "/assets/fonts/fff-forward.font"
+}
 background_color {
   x: 0.0
   y: 0.0
@@ -43,7 +47,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "Poom#1"
-  font: "system_font"
+  font: "fff-forward"
   id: "poom_name"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -74,7 +78,7 @@ nodes {
 nodes {
   position {
     x: 17.0
-    y: 53.0
+    y: 47.0
     z: 0.0
     w: 1.0
   }
@@ -105,7 +109,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "HEALTH:"
-  font: "system_font"
+  font: "fff-forward"
   id: "health_title"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -135,8 +139,8 @@ nodes {
 }
 nodes {
   position {
-    x: 79.0
-    y: 53.0
+    x: 105.0
+    y: 48.0
     z: 0.0
     w: 1.0
   }
@@ -167,7 +171,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "100"
-  font: "system_font"
+  font: "fff-forward"
   id: "health_value"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -198,7 +202,7 @@ nodes {
 nodes {
   position {
     x: 17.0
-    y: 32.0
+    y: 20.0
     z: 0.0
     w: 1.0
   }
@@ -229,7 +233,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "GENERATION:"
-  font: "system_font"
+  font: "fff-forward"
   id: "generation_title"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -259,8 +263,8 @@ nodes {
 }
 nodes {
   position {
-    x: 108.0
-    y: 32.0
+    x: 152.0
+    y: 20.0
     z: 0.0
     w: 1.0
   }
@@ -291,7 +295,7 @@ nodes {
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "1"
-  font: "system_font"
+  font: "fff-forward"
   id: "generation_value"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE

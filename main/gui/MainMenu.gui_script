@@ -38,6 +38,8 @@ function on_message(self, message_id, message, sender)
 			local node = gui.get_node(v)
 			gui.set_enabled(node, true)
 		end
+		local node = gui.get_node('startBtn')
+		gui.set_enabled(node, false)
 
 		local node = gui.get_node('gameOver')
 		local color = vmath.vector3(1, 0, 0)
@@ -48,6 +50,8 @@ function on_message(self, message_id, message, sender)
 			local node = gui.get_node(v)
 			gui.set_enabled(node, true)
 		end
+		local node = gui.get_node('startBtn')
+		gui.set_enabled(node, false)
 
 		local node = gui.get_node('gameOver')
 		local color = vmath.vector3(0, 1, 0)

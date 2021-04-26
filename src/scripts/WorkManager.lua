@@ -23,6 +23,7 @@ function WorkManager.activateByGo(WorkGoId, PoomGoId)
 			WorkEntity.workTimer = 5
 			WorkEntity.sourceGeneration = PoomEntity.generation
 			WorkEntity.sourceName = PoomEntity.name
+			WorkEntity.health = PoomEntity.health
 			World:addEntity(WorkEntity)
 			msg.post(msg.url(nil, WorkGoId, 'sprite'), "play_animation", {id = hash("DuplicatorWork")})
 			-- remove PoomPoomGoId
@@ -69,6 +70,10 @@ function WorkManager.activateByGo(WorkGoId, PoomGoId)
 			msg.post(msg.url(nil, PoomGoId, 'hasFuelBag'), 'disable')
 			FuelManager.addFuelToEngine(WorkEntity, PoomEntity.hasFuelBag)
 			PoomEntity.hasFuelBag = nil
+			PoomEntity.speed = PoomEntity.speed - 0.05
+			if PoomEntity.speed < 0.2 then 
+				PoomEntity.speed = 0.2
+			end
 			World:addEntity(PoomEntity)
 		end
 	end	

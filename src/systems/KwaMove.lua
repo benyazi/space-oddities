@@ -23,8 +23,11 @@ function system:process(e, dt)
 			print("End of moving")
 			return
 		end
-		
-		e.stepTimer = e.speed --0.25
+		local speed = e.speed
+		if e.hasFuelBag then 
+			speed = speed*2
+		end
+		e.stepTimer = speed --0.25
 		local playerPosition = go.get(e.objId, 'position')
 		
 		-- local posX, posY = playerPosition.x - 8, playerPosition.y
@@ -32,9 +35,9 @@ function system:process(e, dt)
 		if e.isPoom then 
 			posY = posY - 2
 		end
-		go.animate(e.objId, "position.x", go.PLAYBACK_ONCE_FORWARD, posX, go.EASING_INOUTCUBIC, e.speed)
-		go.animate(e.objId, "position.y", go.PLAYBACK_ONCE_FORWARD, posY + 4, go.EASING_INCUBIC, e.speed/2)
-		go.animate(e.objId, "position.y", go.PLAYBACK_ONCE_FORWARD, posY, go.EASING_INOUTCUBIC, e.speed/2, e.speed/2)
+		go.animate(e.objId, "position.x", go.PLAYBACK_ONCE_FORWARD, posX, go.EASING_INOUTCUBIC, speed)
+		go.animate(e.objId, "position.y", go.PLAYBACK_ONCE_FORWARD, posY + 4, go.EASING_INCUBIC, speed/2)
+		go.animate(e.objId, "position.y", go.PLAYBACK_ONCE_FORWARD, posY, go.EASING_INOUTCUBIC, speed/2, speed/2)
 		World:addEntity(e)
 	else
 		e.stepTimer = e.stepTimer - dt 

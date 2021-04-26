@@ -26,6 +26,12 @@ function system:process(e, dt)
 					
 					if count == 1 then 
 						PoomEntity.name = e.sourceName
+						PoomEntity.health = e.health
+						PoomEntity.health.current = PoomEntity.health.current - 50
+						PoomEntity.health.max = PoomEntity.health.max - 10
+						if PoomEntity.health.max < 30 then 
+							PoomEntity.health.max = 30
+						end
 					else
 						PoomEntity.name = PoomManager.getName()
 					end
@@ -39,8 +45,9 @@ function system:process(e, dt)
 						-- corruption of health
 						PoomEntity.generation = e.sourceGeneration + count - 1
 						if PoomEntity.generation > 1 then 
-							PoomEntity.health.perSec = PoomEntity.health.perSec + 0.5 * PoomEntity.generation
-							PoomEntity.health.max = PoomEntity.health.max - 5 * PoomEntity.generation
+							PoomEntity.health.current = 50
+							PoomEntity.health.perSec = e.health.perSec + 0.5 * PoomEntity.generation
+							PoomEntity.health.max = e.health.max - 5 * PoomEntity.generation
 							if PoomEntity.health.max < 30 then 
 								PoomEntity.health.max = 30
 							end
